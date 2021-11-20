@@ -1,14 +1,14 @@
 package com.talon.sec.wireguardorchestrationservice.clients;
 
-import com.talon.sec.wireguardorchestrationservice.models.Peer;
+import com.talon.sec.wireguardorchestrationservice.entities.IpAllocation;
+import com.talon.sec.wireguardorchestrationservice.models.PeerEntity;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.InetAddress;
-import java.net.URI;
+import java.net.UnknownHostException;
 
 import static org.springframework.http.HttpMethod.POST;
 
@@ -16,7 +16,7 @@ import static org.springframework.http.HttpMethod.POST;
 public class PeerAgentNotificationClient
 {
 
-    public void notify(Peer otherPeer, NetworkPeerUpdateRequestModel networkPeerUpdate)
+    public void notify(PeerEntity otherPeer, NetworkPeerUpdateRequestModel networkPeerUpdate)
     {
 
 
@@ -27,15 +27,23 @@ public class PeerAgentNotificationClient
     }
 
     @SneakyThrows
-    public boolean isAlive(Peer peer)
+    public boolean isAlive(PeerEntity peer)
     {
-        String ipAddress = peer.getAllocatedIp();
-        InetAddress inet = InetAddress.getByName(ipAddress);
+        IpAllocation ipAllocation = peer.getAllocatedIp();
+        InetAddress inet = null;
+        try
+        {
+            inet = InetAddress.getByName(ipAllocation.getIp());
+        }
+        catch (UnknownHostException e)
+        {
+            return false;
+        }
         return inet.isReachable(5000);
     }
 
-    private String buildUrl(Peer otherPeer)
+    private String buildUrl(PeerEntity otherPeer)
     {
-        return String.format("%s/api/peer", otherPeer.getAllocatedIp());
+        return String.format("http://%s/api/peer", otherPeer.getAllocatedIp());
     }
 }

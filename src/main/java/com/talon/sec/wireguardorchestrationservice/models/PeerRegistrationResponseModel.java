@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 public class PeerRegistrationResponseModel
 {
-    List<Peer> peerList;
+    Long id;
+    List<PeerEntity> peerList;
     String allocatedIp;
 }

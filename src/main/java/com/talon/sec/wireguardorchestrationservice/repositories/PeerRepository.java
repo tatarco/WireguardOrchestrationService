@@ -1,13 +1,13 @@
 package com.talon.sec.wireguardorchestrationservice.repositories;
 
-import com.talon.sec.wireguardorchestrationservice.models.Peer;
+import com.talon.sec.wireguardorchestrationservice.models.PeerEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface PeerRepository extends JpaRepository<Peer,Long>
+public interface PeerRepository extends JpaRepository<PeerEntity,Long>
 {
-    List<Peer> getPeersByTenantId(Long tenantId);
+    List<PeerEntity> getPeersByTenantId(Long tenantId);
 
-    List<Peer> findTop10ByOrderByLastSeenAsc();
+    List<PeerEntity> findTop10ByOrderByLastSeenAsc();
 }

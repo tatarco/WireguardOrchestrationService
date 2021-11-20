@@ -1,7 +1,7 @@
 package com.talon.sec.wireguardorchestrationservice.schedulers;
 
 import com.talon.sec.wireguardorchestrationservice.clients.PeerAgentNotificationClient;
-import com.talon.sec.wireguardorchestrationservice.models.Peer;
+import com.talon.sec.wireguardorchestrationservice.models.PeerEntity;
 import com.talon.sec.wireguardorchestrationservice.repositories.PeerRepository;
 import com.talon.sec.wireguardorchestrationservice.services.PeerService;
 import lombok.RequiredArgsConstructor;
@@ -24,25 +24,25 @@ public class OffboarderScheduler
     @Scheduled(fixedDelay = 10000)
     public void searchForDetachedClientsAndOffBoardThem()
     {
-        List<Peer> peerBatch = pullBatchByLastSeenDateAsc();
+        List<PeerEntity> peerBatch = pullBatchByLastSeenDateAsc();
         updateSeen(peerBatch);
         peerBatch.stream()
                 .filter(this::notAlive)
                 .forEach(this::handleLostClient);
     }
 
-    private void handleLostClient(Peer peer)
+    private void handleLostClient(PeerEntity peer)
     {
         peerService.unRegisterPeer(peer);
     }
 
-    private boolean notAlive(Peer peer)
+    private boolean notAlive(PeerEntity peer)
     {
         boolean isAlive = peerAgentNotificationClient.isAlive(peer);
         return !isAlive;
     }
 
-    private void updateSeen(List<Peer> peerBatch)
+    private void updateSeen(List<PeerEntity> peerBatch)
     {
         peerBatch.forEach(peer -> {
             peer.setLastSeen(LocalDateTime.now());
@@ -50,7 +50,7 @@ public class OffboarderScheduler
         });
     }
 
-    private List<Peer> pullBatchByLastSeenDateAsc()
+    private List<PeerEntity> pullBatchByLastSeenDateAsc()
     {
         return peerRepository.findTop10ByOrderByLastSeenAsc();
     }
